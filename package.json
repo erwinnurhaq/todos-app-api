@@ -1,0 +1,15 @@
+{
+  "name": "todos-app-api",
+  "version": "1.0.0",
+  "description": "todos-app-api",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "node indes.js"
+  },
+  "author": "erwin nurhaq",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "2.0.15"
+  }
+}
