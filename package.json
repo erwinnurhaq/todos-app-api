@@ -4,12 +4,21 @@
   "description": "todos-app-api",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js",
-    "start": "node indes.js"
+    "dev": "npm run db-migrate && nodemon index.js",
+    "start": "npm run db-migrate && node index.js",
+    "db-migrate": "db-migrate down && db-migrate up"
   },
   "author": "erwin nurhaq",
   "license": "ISC",
   "devDependencies": {
     "nodemon": "2.0.15"
+  },
+  "dependencies": {
+    "cors": "2.8.5",
+    "db-migrate": "0.11.13",
+    "db-migrate-mysql": "2.2.0",
+    "dotenv": "10.0.0",
+    "express": "4.17.2",
+    "mysql2": "2.3.3"
   }
 }
