@@ -15,17 +15,18 @@ exports.setup = function(options, seedLink) {
 };
 
 exports.up = function(db) {
-  return db.createTable('Activities', {
+  return db.createTable('Activity', {
     id: { type: type.INTEGER, primaryKey: true, autoIncrement: true, notNull: true },
     email: { type: type.STRING, length: 255, notNull: true },
     title: { type: type.STRING, length: 255, notNull: true },
     created_at: { type: type.DATE_TIME, defaultValue: new String('CURRENT_TIMESTAMP') },
     updated_at: { type: type.DATE_TIME, defaultValue: new String('CURRENT_TIMESTAMP') },
+    deleted_at: { type: type.DATE_TIME, defaultValue: null },
   });
 };
 
 exports.down = function(db) {
-  return db.dropTable('Activities');
+  return db.dropTable('Activity', { ifExists: true });
 };
 
 exports._meta = {

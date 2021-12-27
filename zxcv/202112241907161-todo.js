@@ -15,17 +15,17 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db) {
-  return db.createTable("Todos", {
+  return db.createTable("Todo", {
     id: {
       type: type.INTEGER,
       primaryKey: true,
       autoIncrement: true,
       notNull: true,
     },
-    activity_group_id: { type: type.INTEGER, notNull: true },
+    activity_group_id: { type: type.STRING, length: 255, notNull: true },
     title: { type: type.STRING, length: 255, notNull: true },
-    is_active: { type: type.INTEGER, notNull: true },
-    priority: { type: type.STRING, length: 10, defaultValue: "very-high" },
+    is_active: { type: type.STRING, length: 255, notNull: true },
+    priority: { type: type.STRING, length: 255, defaultValue: "very-high" },
     created_at: {
       type: type.DATE_TIME,
       defaultValue: new String("CURRENT_TIMESTAMP"),
@@ -34,11 +34,12 @@ exports.up = function (db) {
       type: type.DATE_TIME,
       defaultValue: new String("CURRENT_TIMESTAMP"),
     },
+    deleted_at: { type: type.DATE_TIME, defaultValue: null },
   });
 };
 
 exports.down = function (db) {
-  return db.dropTable("Todos");
+  return db.dropTable("Todo", { ifExists: true });
 };
 
 exports._meta = {

@@ -11,7 +11,7 @@ function getStatus(code) {
   }
 }
 
-function send(res, code, message = "success", data = null) {
+function send(res, code, message = "success", data = {}) {
   return res.status(code).send({
     status: getStatus(code),
     message,

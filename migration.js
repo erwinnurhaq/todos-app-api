@@ -1,4 +1,5 @@
-const mysql = require("mysql2");
+const mysql = require('mysql2');
+const migration = require('mysql-migrations');
 
 const config = {
   host: process.env.MYSQL_HOST || 'localhost',
@@ -9,6 +10,6 @@ const config = {
   connectionLimit: 100,
   multipleStatements: true
 };
-const db = mysql.createPool(config).promise();
+const connection = mysql.createPool(config);
 
-module.exports = db;
+migration.init(connection, __dirname + '/migrations');
