@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "npm run db-migrate && nodemon index.js",
     "start": "npm run db-migrate && node index.js",
-    "db-migrate": "node migration.js up --migrate-all"
+    "db-migrate": "node migration.js up --migrate-all && node migration.js refresh"
   },
   "author": "erwin nurhaq",
   "license": "ISC",
