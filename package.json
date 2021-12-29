@@ -4,9 +4,8 @@
   "description": "todos-app-api",
   "main": "index.js",
   "scripts": {
-    "dev": "npm run db-migrate && nodemon index.js",
-    "start": "npm run db-migrate && node index.js",
-    "db-migrate": "node migration.js up --migrate-all && node migration.js refresh"
+    "dev": "nodemon index.js",
+    "start": "node index.js"
   },
   "author": "erwin nurhaq",
   "license": "ISC",
@@ -20,6 +19,8 @@
     "dotenv": "10.0.0",
     "express": "4.17.2",
     "mysql-migrations": "1.0.7",
-    "mysql2": "2.3.3"
+    "mysql2": "2.3.3",
+    "sequelize": "6.12.4",
+    "sequelize-cli": "6.3.0"
   }
 }

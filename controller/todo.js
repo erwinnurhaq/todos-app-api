@@ -1,26 +1,14 @@
-const { format } = require("mysql2");
 const send = require("../config/response");
-const db = require("../config/database");
+const Activity = require("../models/activity");
+const Todo = require("../models/todo");
 
 function TodoController() {
-  this._getTodo = async (id) => {
-    try {
-      const query = `SELECT * FROM Todo WHERE id = ?;`;
-      const [rows] = await db.execute(query, [id]);
-      return rows[0];
-    } catch (err) {
-      throw err;
-    }
-  };
-
   this.getAll = async (req, res) => {
     try {
-      const { activity_group_id = "" } = req.query;
-      const query = `SELECT * FROM Todo ${
-        activity_group_id ? "WHERE activity_group_id = ?" : ""
-      };`;
-      const [rows] = await db.execute(query, [activity_group_id]);
-      return send(res, 200, "Success", rows);
+      const { activity_group_id } = req.query;
+      const options = activity_group_id ? { where: { activity_group_id } } : {};
+      const data = await Todo.findAll(options);
+      return send(res, 200, "Success", data);
     } catch (err) {
       return send(res, 400, err.message);
     }
@@ -29,9 +17,9 @@ function TodoController() {
   this.getOne = async (req, res) => {
     try {
       const { id } = req.params;
-      const todo = await this._getTodo(id);
-      return todo
-        ? send(res, 200, "Success", todo)
+      const data = await Todo.findByPk(id);
+      return data
+        ? send(res, 200, "Success", data)
         : send(res, 404, `Todo with ID ${id} Not Found`);
     } catch (err) {
       return send(res, 400, err.message);
@@ -40,27 +28,37 @@ function TodoController() {
 
   this.create = async (req, res) => {
     try {
-      console.log(process.pid);
-      if (!req.body.title) {
+      const {
+        title,
+        activity_group_id,
+        priority = "very-high",
+        is_active = "1",
+      } = req.body;
+
+      if (!title) {
         return send(res, 400, "title cannot be null");
       }
-      if (!req.body.activity_group_id) {
+      if (!activity_group_id) {
         return send(res, 400, "activity_group_id cannot be null");
       }
-      const data = {
-        activity_group_id: req.body.activity_group_id,
-        title: req.body.title,
-        priority: req.body.priority || "very-high",
-        is_active: "1",
-      };
-      const query = `INSERT INTO Todo SET ?, created_at=now(), updated_at=now()`;
-      const [result] = await db.execute(format(query, data));
-      const todo = await this._getTodo(result.insertId);
-      return send(res, 201, "Success", {
-        ...todo,
-        is_active: true,
-        activity_group_id: Number(todo.activity_group_id),
+
+      // const isExist = await Activity.findByPk(activity_group_id);
+      // if (!isExist) {
+      //   return send(
+      //     res,
+      //     404,
+      //     `Activity with activity_group_id ${activity_group_id} Not Found`
+      //   );
+      // }
+
+      const data = await Todo.create({
+        activity_group_id,
+        title,
+        priority,
+        is_active,
       });
+      data.is_active = true;
+      return send(res, 201, "Success", data);
     } catch (err) {
       return send(res, 400, err.message);
     }
@@ -69,21 +67,23 @@ function TodoController() {
   this.update = async (req, res) => {
     try {
       const { id } = req.params;
-      if (req.body.title?.length === 0) {
+      const { title, is_active, priority } = req.body;
+      if (title?.length === 0) {
         return send(res, 400, "title cannot be empty");
       }
-      const data = { ...req.body };
-      if (typeof req.body.is_active === "boolean") {
-        data.is_active = Number(req.body.is_active).toString();
-      }
 
-      const query = `UPDATE Todo SET ?, updated_at=now() WHERE id = ?`;
-      const [result] = await db.execute(format(query, [data, id]));
-      if (result.affectedRows === 0) {
+      const data = await Todo.findByPk(id);
+      if (!data) {
         return send(res, 404, `Todo with ID ${id} Not Found`);
       }
-      const todo = await this._getTodo(id);
-      return send(res, 200, "Success", todo);
+      data.title = title || data.title;
+      data.is_active =
+        is_active !== undefined ? String(Number(is_active)) : data.is_active;
+      data.priority = priority || data.priority;
+      data.updated_at = Date.now();
+
+      await Todo.update(data.dataValues, { where: { id } });
+      return send(res, 200, "Success", data);
     } catch (err) {
       return send(res, 400, err.message);
     }
@@ -92,11 +92,12 @@ function TodoController() {
   this.del = async (req, res) => {
     try {
       const { id } = req.params;
-      const query = `DELETE FROM Todo WHERE id = ?`;
-      const [result] = await db.execute(query, [id]);
-      return result.affectedRows > 0
-        ? send(res, 200, "Success")
-        : send(res, 404, `Todo with ID ${id} Not Found`);
+      const data = await Todo.findByPk(id);
+      if (!data) {
+        return send(res, 404, `Todo with ID ${id} Not Found`);
+      }
+      await Todo.destroy({ where: { id } });
+      return send(res, 200, "Success");
     } catch (err) {
       return send(res, 400, err.message);
     }

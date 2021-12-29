@@ -1,13 +1,30 @@
-const mysql = require("mysql2");
+const Types = require("sequelize");
 
-const config = {
-  host: process.env.MYSQL_HOST || 'localhost',
-  user: process.env.MYSQL_USER || 'root',
-  password: process.env.MYSQL_PASSWORD || 'lollipop.',
-  database: process.env.MYSQL_DBNAME || 'todo-list',
-  port: 3306,
-  multipleStatements: true
+const { Sequelize } = Types;
+
+const DB = {
+  HOST: process.env.MYSQL_HOST || "localhost",
+  USER: process.env.MYSQL_USER || "root",
+  PASSWORD: process.env.MYSQL_PASSWORD || "lollipop.",
+  DATABASE: process.env.MYSQL_DBNAME || "todo-list",
+  DIALECT: "mysql",
+  PORT: 3306,
 };
-const db = mysql.createPool(config).promise();
 
-module.exports = db;
+const sequelize = new Sequelize(DB.DATABASE, DB.USER, DB.PASSWORD, {
+  host: DB.HOST,
+  dialect: DB.DIALECT,
+  port: DB.PORT,
+  benchmark: true,
+});
+
+sequelize
+  .authenticate()
+  .then(() => console.log("DATABASE CONNECTED"))
+  .catch((err) => console.error(err.message));
+
+module.exports = {
+  sequelize,
+  Sequelize,
+  Types,
+}

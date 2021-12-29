@@ -1,21 +1,25 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const { sequelize } = require("./config/database");
 const send = require("./config/response");
-const router = require("./router")
+const router = require("./router");
 const cluster = require("cluster");
 const totalCPUs = require("os").cpus().length;
 const PORT = process.env.PORT || 3030;
 
+sequelize.sync({ force: true });
+// sequelize.sync();
+
 if (cluster.isMaster) {
   console.log(`Number of CPUs is ${totalCPUs}`);
   console.log(`Master ${process.pid} is running`);
-  
+
   // Fork workers.
   for (let i = 0; i < totalCPUs; i++) {
     cluster.fork();
   }
-  
+
   cluster.on("exit", (worker, code, signal) => {
     console.log(`worker ${worker.process.pid} died`);
     console.log("Let's fork another worker!");
