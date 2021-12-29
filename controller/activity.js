@@ -5,7 +5,7 @@ function ActivityController() {
   this.getAll = async (req, res) => {
     try {
       const { email = "" } = req.query;
-      const query = `SELECT * FROM Activity ${email ? "WHERE email = ?" : ""} LIMIT 1;`;
+      const query = `SELECT * FROM Activity ${email ? "WHERE email = ?" : ""} LIMIT 5;`;
       const [rows] = await db.query(query, [email]);
       return send(res, 200, "Success", rows);
     } catch (err) {

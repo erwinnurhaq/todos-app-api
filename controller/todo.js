@@ -7,7 +7,7 @@ function TodoController() {
       const { activity_group_id } = req.query;
       const query = `SELECT * FROM Todo ${
         activity_group_id ? "WHERE activity_group_id = ?" : ""
-      } LIMIT 1;`;
+      } LIMIT 5;`;
       const [rows] = await db.query(query, [activity_group_id]);
       return send(res, 200, "Success", rows);
     } catch (err) {
