@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const send = require("./config/response");
+const logger = require("./config/logger");
 const router = require("./router")
 const cluster = require("cluster");
 const totalCPUs = require("os").cpus().length;
@@ -28,6 +29,7 @@ if (cluster.isMaster) {
   app.use(cors());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use(logger)
 
   app.get("/", (req, res) => send(res, 200, "Welcome to API TODO"));
   app.use("/activity-groups", router.activity);
