@@ -1,23 +1,12 @@
-const { format } = require("mysql2");
 const send = require("../config/response");
 const db = require("../config/database");
 
 function ActivityController() {
-  this._getActivity = async (id) => {
-    try {
-      const query = `SELECT * FROM Activity WHERE id = ?;`;
-      const [rows] = await db.execute(query, [id]);
-      return rows[0];
-    } catch (err) {
-      throw err;
-    }
-  };
-
   this.getAll = async (req, res) => {
     try {
       const { email = "" } = req.query;
-      const query = `SELECT * FROM Activity ${email ? "WHERE email = ?" : ""};`;
-      const [rows] = await db.execute(query, [email]);
+      const query = `SELECT * FROM Activity ${email ? "WHERE email = ?" : ""} LIMIT 5;`;
+      const [rows] = await db.query(query, [email]);
       return send(res, 200, "Success", rows);
     } catch (err) {
       return send(res, 400, err.message);
@@ -27,9 +16,10 @@ function ActivityController() {
   this.getOne = async (req, res) => {
     try {
       const { id } = req.params;
-      const activity = await this._getActivity(id);
-      return activity
-        ? send(res, 200, "Success", activity)
+      const query = `SELECT * FROM Activity WHERE id = ?;`;
+      const [rows] = await db.query(query, [id]);
+      return rows.length > 0
+        ? send(res, 200, "Success", rows[0])
         : send(res, 404, `Activity with ID ${id} Not Found`);
     } catch (err) {
       return send(res, 400, err.message);
@@ -42,10 +32,9 @@ function ActivityController() {
       if (!title) {
         return send(res, 400, "title cannot be null");
       }
-      const query = `INSERT INTO Activity SET ?, created_at=now(), updated_at=now()`;
-      const [result] = await db.execute(format(query, { email, title }));
-      const activity = await this._getActivity(result.insertId);
-      return send(res, 201, "Success", activity);
+      const query = `INSERT INTO Activity SET ?; SELECT * FROM Activity WHERE id = LAST_INSERT_ID();`;
+      const [result] = await db.query(query, { email, title });
+      return send(res, 201, "Success", result[1][0]);
     } catch (err) {
       return send(res, 400, err.message);
     }
@@ -58,13 +47,12 @@ function ActivityController() {
       if (!title) {
         return send(res, 400, "title cannot be null");
       }
-      const query = `UPDATE Activity SET ?, updated_at=now() WHERE id = ?`;
-      const [result] = await db.execute(format(query, [{ title }, id]));
-      if (result.affectedRows === 0) {
+      const query = `UPDATE Activity SET ?, updated_at=now() WHERE id = ?; SELECT * FROM Activity WHERE id = ?;`;
+      const [result] = await db.query(query, [{ title }, id, id]);
+      if (result[0].affectedRows === 0) {
         return send(res, 404, `Activity with ID ${id} Not Found`);
       }
-      const activity = await this._getActivity(id);
-      return send(res, 200, "Success", activity);
+      return send(res, 200, "Success", result[1][0]);
     } catch (err) {
       return send(res, 400, err.message);
     }
@@ -74,7 +62,7 @@ function ActivityController() {
     try {
       const { id } = req.params;
       const query = `DELETE FROM Activity WHERE id = ?`;
-      const [result] = await db.execute(query, [id]);
+      const [result] = await db.query(query, [id]);
       return result.affectedRows > 0
         ? send(res, 200, "Success")
         : send(res, 404, `Activity with ID ${id} Not Found`);
