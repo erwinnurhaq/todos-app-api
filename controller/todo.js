@@ -40,6 +40,7 @@ function TodoController() {
 
   this.create = async (req, res) => {
     try {
+      console.log(process.pid);
       if (!req.body.title) {
         return send(res, 400, "title cannot be null");
       }
@@ -49,15 +50,15 @@ function TodoController() {
       const data = {
         activity_group_id: req.body.activity_group_id,
         title: req.body.title,
-        is_active: req.body.is_active || "1",
         priority: req.body.priority || "very-high",
+        is_active: "1",
       };
       const query = `INSERT INTO Todo SET ?, created_at=now(), updated_at=now()`;
       const [result] = await db.execute(format(query, data));
       const todo = await this._getTodo(result.insertId);
       return send(res, 201, "Success", {
         ...todo,
-        is_active: Boolean(Number(todo.is_active)),
+        is_active: true,
         activity_group_id: Number(todo.activity_group_id),
       });
     } catch (err) {
