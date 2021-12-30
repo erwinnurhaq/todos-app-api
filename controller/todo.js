@@ -5,7 +5,7 @@ function TodoController() {
   this.getAll = async (req, res) => {
     try {
       const { activity_group_id } = req.query;
-      const query = `SELECT * FROM Todo ${
+      const query = `SELECT * FROM todos ${
         activity_group_id ? "WHERE activity_group_id = ?" : ""
       } LIMIT 5;`;
       const [rows] = await db.query(query, [activity_group_id]);
@@ -18,7 +18,7 @@ function TodoController() {
   this.getOne = async (req, res) => {
     try {
       const { id } = req.params;
-      const query = `SELECT * FROM Todo WHERE id = ?;`;
+      const query = `SELECT * FROM todos WHERE id = ?;`;
       const [rows] = await db.query(query, [id]);
       return rows.length > 0
         ? send(res, 200, "Success", rows[0])
@@ -42,7 +42,7 @@ function TodoController() {
         priority: req.body.priority || "very-high",
         is_active: "1",
       };
-      const query = `INSERT INTO Todo SET ?; SELECT * FROM Todo WHERE id = LAST_INSERT_ID();`;
+      const query = `INSERT INTO todos SET ?; SELECT * FROM todos WHERE id = LAST_INSERT_ID();`;
       const [result] = await db.query(query, data);
       return send(res, 201, "Success", {
         ...result[1][0],
@@ -65,7 +65,7 @@ function TodoController() {
         data.is_active = String(Number(req.body.is_active))
       }
 
-      const query = `UPDATE Todo SET ?, updated_at=now() WHERE id = ?; SELECT * FROM Todo WHERE id = ?;`;
+      const query = `UPDATE todos SET ?, updated_at=now() WHERE id = ?; SELECT * FROM todos WHERE id = ?;`;
       const [result] = await db.query(query, [data, id, id]);
       if (result[0].affectedRows === 0) {
         return send(res, 404, `Todo with ID ${id} Not Found`);
@@ -79,7 +79,7 @@ function TodoController() {
   this.del = async (req, res) => {
     try {
       const { id } = req.params;
-      const query = `DELETE FROM Todo WHERE id = ?`;
+      const query = `DELETE FROM todos WHERE id = ?`;
       const [result] = await db.query(query, [id]);
       return result.affectedRows > 0
         ? send(res, 200, "Success")
