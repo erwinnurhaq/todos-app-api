@@ -1,6 +1,14 @@
-node_modules
-.env
-.dockerignore
-.gitignore
-Dockerfile
-note.txt
+# node_modules
+# .env
+# .dockerignore
+# .gitignore
+# Dockerfile
+# note.txt
+
+*
+
+!build
+!package.json
+!package-lock.json
+!migration.js
+!migrations
