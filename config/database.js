@@ -1,4 +1,5 @@
-const mysql = require("mysql2");
+const mysql = require("mysql");
+const util = require('util')
 
 const config = {
   host: process.env.MYSQL_HOST || 'localhost',
@@ -8,6 +9,7 @@ const config = {
   port: 3306,
   multipleStatements: true
 };
-const db = mysql.createPool(config).promise();
+const pool = mysql.createPool(config)
+const db = util.promisify(pool.query).bind(pool);
 
 module.exports = db;

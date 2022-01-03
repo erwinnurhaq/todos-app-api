@@ -5,10 +5,7 @@ function TodoController() {
   this.getAll = async (req, res) => {
     try {
       const { activity_group_id } = req.query;
-      const query = `SELECT * FROM todos ${
-        activity_group_id ? "WHERE activity_group_id = ?" : ""
-      } LIMIT 5;`;
-      const [rows] = await db.query(query, [activity_group_id]);
+      const rows = await db(`SELECT * FROM todos ${activity_group_id ? "WHERE activity_group_id = ?" : ""} LIMIT 5;`, [activity_group_id]);
       return send(res, 200, "Success", rows);
     } catch (err) {
       return send(res, 400, err.message);
@@ -18,8 +15,7 @@ function TodoController() {
   this.getOne = async (req, res) => {
     try {
       const { id } = req.params;
-      const query = `SELECT * FROM todos WHERE id = ?;`;
-      const [rows] = await db.query(query, [id]);
+      const rows = await db(`SELECT * FROM todos WHERE id = ?;`, [id]);
       return rows.length > 0
         ? send(res, 200, "Success", rows[0])
         : send(res, 404, `Todo with ID ${id} Not Found`);
@@ -42,8 +38,7 @@ function TodoController() {
         priority: req.body.priority || "very-high",
         is_active: "1",
       };
-      const query = `INSERT INTO todos SET ?; SELECT * FROM todos WHERE id = LAST_INSERT_ID();`;
-      const [result] = await db.query(query, data);
+      const result = await db(`INSERT INTO todos SET ?; SELECT * FROM todos WHERE id = LAST_INSERT_ID();`, data);
       return send(res, 201, "Success", {
         ...result[1][0],
         is_active: true,
@@ -65,8 +60,7 @@ function TodoController() {
         data.is_active = String(Number(req.body.is_active))
       }
 
-      const query = `UPDATE todos SET ?, updated_at=now() WHERE id = ?; SELECT * FROM todos WHERE id = ?;`;
-      const [result] = await db.query(query, [data, id, id]);
+      const result = await db(`UPDATE todos SET ?, updated_at=now() WHERE id = ?; SELECT * FROM todos WHERE id = ?;`, [data, id, id]);
       if (result[0].affectedRows === 0) {
         return send(res, 404, `Todo with ID ${id} Not Found`);
       }
@@ -79,8 +73,7 @@ function TodoController() {
   this.del = async (req, res) => {
     try {
       const { id } = req.params;
-      const query = `DELETE FROM todos WHERE id = ?`;
-      const [result] = await db.query(query, [id]);
+      const result = await db(`DELETE FROM todos WHERE id = ?`, [id]);
       return result.affectedRows > 0
         ? send(res, 200, "Success")
         : send(res, 404, `Todo with ID ${id} Not Found`);
