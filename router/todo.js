@@ -4,7 +4,7 @@ const cacheMiddleware = require('../config/cacheMiddleware')
 
 router.get('/', controller.todo.getAll)
 router.get('/:id', cacheMiddleware(30), controller.todo.getOne)
-router.post('/', controller.todo.create)
+router.post('/', cacheMiddleware(30), controller.todo.create)
 router.patch('/:id', controller.todo.update)
 router.delete('/:id', controller.todo.del)
 
