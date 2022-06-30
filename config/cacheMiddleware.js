@@ -6,8 +6,7 @@ const cacheMiddleware = (duration) => (req, res, next) => {
   const key = `__express__${req.originalUrl || req.url}${JSON.stringify(req.query)}${JSON.stringify(req.body)}`;
   const cacheContent = memCache.get(key);
   if (cacheContent) {
-    res.send(cacheContent);
-    return;
+    return res.send(cacheContent);
   } else {
     res.sendResponse = res.send;
     res.send = (body) => {
